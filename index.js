@@ -26,6 +26,32 @@ app.get("/popular-raging-product", (req, res) => {
       .collection("Top_Rated_Products");
     const result = await collection.findOne({ isSelected: "true" });
     res.send(result);
+    // client.close();
+  });
+});
+app.post("/userdata", (req, res) => {
+  client.connect(async (err) => {
+    const collection = client.db("Salam_Furniture_Mart").collection("UserData");
+    const result = await collection.insertOne(req.body);
+    res.send(result);
+    // client.close();
+  });
+});
+app.get("/isadmin/:email", (req, res) => {
+  const email = req.params.email;
+  client.connect(async (err) => {
+    const collection = client.db("Salam_Furniture_Mart").collection("UserData");
+    const result = await collection.findOne({ email: email });
+    if (result) {
+      if (result.role === "admin") {
+        res.send({ isAdmin: true });
+      } else {
+        res.send({ isAdmin: false });
+      }
+    } else {
+      res.send({ isAdmin: null });
+    }
+    // client.close();
   });
 });
 
