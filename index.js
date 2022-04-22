@@ -29,6 +29,24 @@ app.get("/popular-raging-product", (req, res) => {
     // client.close();
   });
 });
+app.post("/product", (req, res) => {
+  client.connect(async (err) => {
+    const collection = client.db("Salam_Furniture_Mart").collection("products");
+    const result = await collection.insertOne(req.body);
+    res.send(result);
+    // client.close();
+  });
+});
+app.get("/product-count/:type", (req, res) => {
+  const type = req.params.type;
+  client.connect(async (err) => {
+    const collection = client.db("Salam_Furniture_Mart").collection("products");
+    const result = collection.find({ pType: type });
+    const countArr = await result.toArray();
+    res.send({ productCount: countArr.length });
+    // client.close();
+  });
+});
 app.post("/userdata", (req, res) => {
   client.connect(async (err) => {
     const collection = client.db("Salam_Furniture_Mart").collection("UserData");
