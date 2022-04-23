@@ -37,6 +37,43 @@ app.post("/product", (req, res) => {
     // client.close();
   });
 });
+app.get("/product/3/:type", (req, res) => {
+  const type = req.params.type;
+  client.connect(async (err) => {
+    const collection = client.db("Salam_Furniture_Mart").collection("products");
+    const result = collection.find({ pType: type });
+    const product3 = await result.limit(3).toArray();
+    if (product3.length > 0) {
+      res.send({ products: product3, count: product3.length });
+    } else {
+      res.send({ products: null, count: product3.length });
+    }
+    // client.close();
+  });
+});
+app.get("/product/:productId", (req, res) => {
+  const id = req.params.productId;
+  client.connect(async (err) => {
+    const collection = client.db("Salam_Furniture_Mart").collection("products");
+    const result = await collection.findOne({ pId: id });
+    res.send(result);
+    // client.close();
+  });
+});
+app.get("/products/:productType", (req, res) => {
+  const type = req.params.productType;
+  client.connect(async (err) => {
+    const collection = client.db("Salam_Furniture_Mart").collection("products");
+    const result = collection.find({ pType: type });
+    const products = await result.toArray();
+    if (products.length > 0) {
+      res.send({ products, count: products.length });
+    } else {
+      res.send({ products: null, count: products.length });
+    }
+    // client.close();
+  });
+});
 app.get("/product-count/:type", (req, res) => {
   const type = req.params.type;
   client.connect(async (err) => {
