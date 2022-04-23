@@ -92,6 +92,16 @@ app.post("/userdata", (req, res) => {
     // client.close();
   });
 });
+app.post("/buy-req", (req, res) => {
+  client.connect(async (err) => {
+    const collection = client
+      .db("Salam_Furniture_Mart")
+      .collection("AllOrders");
+    const result = await collection.insertOne(req.body);
+    res.send(result);
+    // client.close();
+  });
+});
 app.get("/isadmin/:email", (req, res) => {
   const email = req.params.email;
   client.connect(async (err) => {
