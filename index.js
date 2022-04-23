@@ -102,6 +102,37 @@ app.post("/buy-req", (req, res) => {
     // client.close();
   });
 });
+app.get("/my-orders/:email", (req, res) => {
+  //my orders
+  const email = req.params.email;
+  client.connect(async (err) => {
+    const collection = client
+      .db("Salam_Furniture_Mart")
+      .collection("AllOrders");
+    const result = collection.find({ email: email });
+    const myOrders = await result.toArray();
+    if (myOrders.length > 0) {
+      res.send({ myOrders, count: myOrders.length });
+    } else {
+      res.send({ myOrders: null, count: myOrders.length });
+    }
+    // client.close();
+  });
+});
+app.delete("/my-orders/delete/:email/:pId", (req, res) => {
+  //delete an orders
+  const pId = req.params.pId;
+  const email = req.params.email;
+  console.log(pId, email);
+  client.connect(async (err) => {
+    const collection = client
+      .db("Salam_Furniture_Mart")
+      .collection("AllOrders");
+    const result = await collection.deleteOne({ email: email, pId: pId });
+    res.send(result);
+    // client.close();
+  });
+});
 app.get("/isadmin/:email", (req, res) => {
   const email = req.params.email;
   client.connect(async (err) => {
