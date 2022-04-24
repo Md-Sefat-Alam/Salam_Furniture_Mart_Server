@@ -37,6 +37,21 @@ app.post("/product", (req, res) => {
     // client.close();
   });
 });
+app.get("/recent-product-added", (req, res) => {
+  //get recent product
+  client.connect(async (err) => {
+    const collection = client.db("Salam_Furniture_Mart").collection("products");
+    const result = collection.find({}).sort({ _id: -1 });
+    const newProducts = await result.limit(3).toArray();
+
+    if (newProducts.length > 0) {
+      res.send({ products: newProducts, count: newProducts.length });
+    } else {
+      res.send({ products: null, count: newProducts.length });
+    }
+    // client.close();
+  });
+});
 app.get("/product/3/:type", (req, res) => {
   const type = req.params.type;
   client.connect(async (err) => {
@@ -118,6 +133,7 @@ app.get("/all-orders", (req, res) => {
     // client.close();
   });
 });
+
 app.get("/my-orders/:email", (req, res) => {
   //my orders
   const email = req.params.email;
