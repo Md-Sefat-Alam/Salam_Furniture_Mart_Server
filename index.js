@@ -1,11 +1,12 @@
 const express = require("express");
-const { MongoClient, ServerApiVersion } = require("mongodb");
+const { MongoClient, ServerApiVersion, ObjectId } = require("mongodb");
 const cors = require("cors");
 const app = express();
 app.use(cors());
 const port = process.env.PORT || 5000;
 require("dotenv").config();
 app.use(express.json());
+const stripe = require("stripe")(process.env.STRIPE_SECRET);
 
 const uri = `mongodb+srv://${process.env.DbUser}:${process.env.DbPass}@cluster0.npegz.mongodb.net/myFirstDatabase?retryWrites=true&w=majority`;
 const client = new MongoClient(uri, {
@@ -151,16 +152,48 @@ app.get("/my-orders/:email", (req, res) => {
     // client.close();
   });
 });
-app.delete("/my-orders/delete/:email/:pId", (req, res) => {
+app.delete("/my-orders/delete/:id", (req, res) => {
   //delete an orders
-  const pId = req.params.pId;
+  const id = req.params.id;
   const email = req.params.email;
-  console.log(pId, email);
   client.connect(async (err) => {
     const collection = client
       .db("Salam_Furniture_Mart")
       .collection("AllOrders");
-    const result = await collection.deleteOne({ email: email, pId: pId });
+    const result = await collection.deleteOne({ _id: ObjectId(id) });
+    res.send(result);
+    // client.close();
+  });
+});
+app.get("/my-orders/get/:id", (req, res) => {
+  //get an specific order details
+  const id = req.params.id;
+  client.connect(async (err) => {
+    const collection = client
+      .db("Salam_Furniture_Mart")
+      .collection("AllOrders");
+    const result = await collection.findOne({ _id: ObjectId(id) });
+    res.send(result);
+    // client.close();
+  });
+});
+app.put("/my-orders/make-payment/:id", (req, res) => {
+  //get an specific order details
+  const id = req.params.id;
+  const paymentIntent = req.body;
+  client.connect(async (err) => {
+    const collection = client
+      .db("Salam_Furniture_Mart")
+      .collection("AllOrders");
+    const filter = { _id: ObjectId(id) };
+    const options = { upsert: true };
+    const updateData = {
+      $set: {
+        payStatus: "paid",
+        paymentIntent,
+      },
+    };
+    const result = await collection.updateOne(filter, updateData, options);
     res.send(result);
     // client.close();
   });
@@ -181,6 +214,20 @@ app.get("/isadmin/:email", (req, res) => {
     }
     // client.close();
   });
+});
+
+app.post("/create-payment-intent", async (req, res) => {
+  const paymentInfo = req.body;
+  const amount = paymentInfo.price * 100;
+  const paymentIntent = await stripe.paymentIntents.create({
+    currency: "usd",
+    amount: amount,
+    payment_method_types: ["card"],
+    // automatic_payment_methods: {
+    //   enabled: true,
+    // },
+  });
+  res.json({ clientSecret: paymentIntent.client_secret });
 });
 
 app.get("/", (req, res) => {
