@@ -231,7 +231,7 @@ app.post("/create-payment-intent", async (req, res) => {
 });
 
 app.get("/", (req, res) => {
-  res.send("Salam Furniture Mart");
+  res.send("Welcome to Salam Furniture Mart backend");
 });
 app.listen(port, () => {
   console.log("lisening to port ", port);
